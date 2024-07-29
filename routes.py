@@ -1,4 +1,4 @@
-from flask import request, jsonify, render_template_string, redirect, url_for, session
+from flask import request, jsonify, render_template, redirect, url_for, session
 import jwt
 from datetime import datetime, timedelta
 from models import User, Message
@@ -7,7 +7,7 @@ from extensions import db
 def register_routes(app):
     @app.route('/')
     def index():
-        return render_template_string(open('homepageIndex.html').read())
+        return render_template('homepageIndex.html')
 
     @app.route('/register', methods=['GET', 'POST'])
     def register():
@@ -32,7 +32,7 @@ def register_routes(app):
             db.session.commit()
             
             return jsonify({'message': 'User registered successfully'}), 201
-        return render_template_string(open('registerForm.html').read())
+        return render_template('registerForm.html')
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -52,7 +52,7 @@ def register_routes(app):
                 token = jwt.encode({'user_id': user.id, 'exp': datetime.utcnow() + timedelta(hours=1)}, app.config['SECRET_KEY'])
                 return jsonify({'token': token})
             return jsonify({'message': 'Invalid credentials'}), 401
-        return render_template_string(open('login.html').read())
+        return render_template('login.html')
 
     @app.route('/dashboard', methods=['GET', 'POST'])
     def dashboard():
@@ -72,7 +72,7 @@ def register_routes(app):
             return jsonify({'message': 'Message sent successfully'}), 201
         
         messages = Message.query.filter((Message.sender_id == data['user_id']) | (Message.receiver_id == data['user_id'])).all()
-        return render_template_string(open('chatInterface.html').read(), messages=messages)
+        return render_template('chatInterface.html', messages=messages)
 
     @app.route('/logout')
     def logout():
