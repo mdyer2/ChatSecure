@@ -1,4 +1,3 @@
-
 from flask import request, jsonify, render_template_string, redirect, url_for, session
 import jwt
 from datetime import datetime, timedelta
@@ -50,9 +49,8 @@ def register_routes(app):
             return jsonify({'message': 'Token is invalid'}), 403
 
         if request.method == 'POST':
-            receiver_id = request.form['receiver_id']
             content = request.form['message']
-            new_message = Message(sender_id=data['user_id'], receiver_id=receiver_id, content=content)
+            new_message = Message(sender_id=data['user_id'], content=content)
             db.session.add(new_message)
             db.session.commit()
             return jsonify({'message': 'Message sent successfully'}), 201
@@ -70,3 +68,33 @@ def register_routes(app):
         users = User.query.all()
         users_list = [{'id': user.id, 'username': user.username} for user in users]
         return jsonify(users_list)
+
+    @app.route('/send_message', methods=['POST'])
+    def send_message():
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'Token is missing'}), 403
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except:
+            return jsonify({'message': 'Token is invalid'}), 403
+        user_id = data['user_id']
+        data = request.get_json()
+        content = data['content']
+        new_message = Message(sender_id=user_id, content=content)
+        db.session.add(new_message)
+        db.session.commit()
+        return jsonify({'message': 'Message sent successfully'}), 201
+
+    @app.route('/get_messages', methods=['GET'])
+    def get_messages():
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'Token is missing'}), 403
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except:
+            return jsonify({'message': 'Token is invalid'}), 403
+        user_id = data['user_id']
+        messages = Message.query.filter((Message.sender_id == user_id) | (Message.receiver_id == user_id)).all()
+        return jsonify([{'sender_id': msg.sender_id, 'receiver_id': msg.receiver_id, 'content': msg.content, 'timestamp': msg.timestamp} for msg in messages])
