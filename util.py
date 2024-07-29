@@ -20,3 +20,4 @@ def decrypt_message(encrypted_message):
     cipher = AES.new(key, AES.MODE_CBC, iv)
     decrypted = unpad(cipher.decrypt(encrypted_message[16:]), AES.block_size)
     return decrypted.decode()
+
