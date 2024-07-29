@@ -1,23 +1,5 @@
 const apiUrl = window.location.origin;
 
-// Fetch and display users
-function loadUsers() {
-    fetch(`${apiUrl}/users`, {
-        method: 'GET',
-    })
-    .then(response => response.json())
-    .then(data => {
-        const receiverSelect = document.getElementById('receiverSelect');
-        data.forEach(user => {
-            const option = document.createElement('option');
-            option.value = user.id;
-            option.textContent = user.username;
-            receiverSelect.appendChild(option);
-        });
-    })
-    .catch(error => console.error('Error:', error));
-}
-
 // Section to Register on the website and become a user
 document.getElementById('registerForm').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -71,7 +53,6 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
 document.getElementById('messageForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const message = document.getElementById('message').value;
-    const receiverId = document.getElementById('receiverSelect').value;
     const token = localStorage.getItem('token');
 
     fetch(`${apiUrl}/send_message`, {
@@ -80,7 +61,7 @@ document.getElementById('messageForm').addEventListener('submit', function(event
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ receiver_id: receiverId, content: message })
+        body: JSON.stringify({ content: message })
     })
     .then(response => response.json())
     .then(data => {
@@ -93,7 +74,7 @@ document.getElementById('messageForm').addEventListener('submit', function(event
 
 function loadMessages() {
     const token = localStorage.getItem('token');
-    fetch(`${apiUrl}/get_messages/1`, {  // Replace 1 with the actual receiver_id
+    fetch(`${apiUrl}/get_messages`, {  
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -112,8 +93,7 @@ function loadMessages() {
     .catch(error => console.error('Error:', error));
 }
 
-// Load users when the chat page loads
+// Load messages when the chat page loads
 if (window.location.pathname.endsWith('chatInterface.html')) {
-    document.addEventListener('DOMContentLoaded', loadUsers);
     document.addEventListener('DOMContentLoaded', loadMessages);
 }
