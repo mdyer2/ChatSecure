@@ -12,16 +12,25 @@ def register_routes(app):
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if request.method == 'POST':
-            data = request.get_json()
-            username = data['username']
-            email = data['email']
-            password = data['password']
+            data = request.get_json()  # Ensure this reads JSON data
+            if data is None:
+                return jsonify({'message': 'Invalid data format, expected JSON'}), 400
+            
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+            
+            if not username or not email or not password:
+                return jsonify({'message': 'All fields are required'}), 400
+            
             if User.query.filter_by(email=email).first():
                 return jsonify({'message': 'Email already registered'}), 400
+            
             new_user = User(username=username, email=email)
             new_user.set_password(password)
             db.session.add(new_user)
             db.session.commit()
+            
             return jsonify({'message': 'User registered successfully'}), 201
         return render_template_string(open('registerForm.html').read())
 
@@ -29,8 +38,15 @@ def register_routes(app):
     def login():
         if request.method == 'POST':
             data = request.get_json()
-            email = data['email']
-            password = data['password']
+            if data is None:
+                return jsonify({'message': 'Invalid data format, expected JSON'}), 400
+
+            email = data.get('email')
+            password = data.get('password')
+            
+            if not email or not password:
+                return jsonify({'message': 'All fields are required'}), 400
+            
             user = User.query.filter_by(email=email).first()
             if user and user.check_password(password):
                 token = jwt.encode({'user_id': user.id, 'exp': datetime.utcnow() + timedelta(hours=1)}, app.config['SECRET_KEY'])
