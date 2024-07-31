@@ -33,9 +33,7 @@
                 const data = await response.json();
                 console.log(data);
                 if (response.ok) {
-                    // Store the token in localStorage
                     localStorage.setItem('token', data.token);
-                    // Redirect to the dashboard
                     window.location.href = data.redirect_url;
                 } else {
                     alert(data.message);
@@ -47,6 +45,7 @@
     </script>
 </body>
 </html>
+
 
 
 
