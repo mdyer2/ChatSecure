@@ -4,7 +4,7 @@ from extensions import db
 from routes import register_routes
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='app/templates')
     app.config.from_object(Config)
     
     db.init_app(app)
@@ -19,6 +19,7 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     app.run(host='0.0.0.0', port=8000)
+
 
 
 
