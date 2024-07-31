@@ -33,7 +33,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
-                    window.location.href = data.redirect_url;
+                    window.location.href = '/dashboard';
                 } else {
                     alert(data.message);
                 }
