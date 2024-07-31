@@ -12,9 +12,13 @@ def register_routes(app):
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if request.method == 'POST':
-            username = request.form.get('username')
-            email = request.form.get('email')
-            password = request.form.get('password')
+            data = request.get_json()  # Ensure this reads JSON data
+            if data is None:
+                return jsonify({'message': 'Invalid data format, expected JSON'}), 400
+            
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
             
             if not username or not email or not password:
                 return jsonify({'message': 'All fields are required'}), 400
@@ -33,8 +37,12 @@ def register_routes(app):
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if request.method == 'POST':
-            email = request.form.get('email')
-            password = request.form.get('password')
+            data = request.get_json()
+            if data is None:
+                return jsonify({'message': 'Invalid data format, expected JSON'}), 400
+
+            email = data.get('email')
+            password = data.get('password')
             
             if not email or not password:
                 return jsonify({'message': 'All fields are required'}), 400
@@ -87,7 +95,8 @@ def register_routes(app):
         except:
             return jsonify({'message': 'Token is invalid'}), 403
         user_id = data['user_id']
-        content = request.form.get('content')
+        data = request.get_json()
+        content = data['content']
         new_message = Message(sender_id=user_id, content=content)
         db.session.add(new_message)
         db.session.commit()
