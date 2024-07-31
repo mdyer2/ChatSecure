@@ -31,7 +31,7 @@
                 const response = await fetch('/get_messages', {
                     method: 'GET',
                     headers: {
-                        'Authorization': token
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -61,7 +61,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': token
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         content: content
@@ -88,5 +88,3 @@
     </script>
 </body>
 </html>
-
-
