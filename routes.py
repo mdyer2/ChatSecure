@@ -14,35 +14,33 @@ def register_routes(app):
         if request.method == 'POST':
             if request.is_json:
                 data = request.get_json()
-                username = data.get('username')
-                email = data.get('email')
-                password = data.get('password')
-                
-                if not username or not email or not password:
-                    return jsonify({'message': 'All fields are required'}), 400
-                
-                if User.query.filter_by(email=email).first():
-                    return jsonify({'message': 'Email already registered'}), 400
-                
-                new_user = User(username=username, email=email)
-                new_user.set_password(password)
-                db.session.add(new_user)
-                db.session.commit()
-                
-                return jsonify({'message': 'User registered successfully'}), 201
             else:
-                return jsonify({'message': 'Invalid content type, expected application/json'}), 415
+                data = request.form  # Handling form data submission
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+            
+            if not username or not email or not password:
+                return jsonify({'message': 'All fields are required'}), 400
+            
+            if User.query.filter_by(email=email).first():
+                return jsonify({'message': 'Email already registered'}), 400
+            
+            new_user = User(username=username, email=email)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            
+            return jsonify({'message': 'User registered successfully'}), 201
         return render_template('registerForm.html')
-
-
-
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if request.method == 'POST':
-            data = request.get_json()
-            if data is None:
-                return jsonify({'message': 'Invalid data format, expected JSON'}), 400
+            if request.is_json:
+                data = request.get_json()
+            else:
+                data = request.form  # Handling form data submission
 
             email = data.get('email')
             password = data.get('password')
@@ -98,8 +96,11 @@ def register_routes(app):
         except:
             return jsonify({'message': 'Token is invalid'}), 403
         user_id = data['user_id']
-        data = request.get_json()
-        content = data['content']
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form
+        content = data.get('content')
         new_message = Message(sender_id=user_id, content=content)
         db.session.add(new_message)
         db.session.commit()
@@ -117,3 +118,4 @@ def register_routes(app):
         user_id = data['user_id']
         messages = Message.query.filter((Message.sender_id == user_id) | (Message.receiver_id == user_id)).all()
         return jsonify([{'sender_id': msg.sender_id, 'receiver_id': msg.receiver_id, 'content': msg.content, 'timestamp': msg.timestamp} for msg in messages])
+
