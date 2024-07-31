@@ -60,7 +60,8 @@ def register_routes(app):
         if not token:
             return jsonify({'message': 'Token is missing'}), 403
         try:
-            data = jwt.decode(token.split(" ")[1], app.config['SECRET_KEY'], algorithms=['HS256'])
+            token = token.split(" ")[1]  # Ensure the token is in the correct format
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         except Exception as e:
             return jsonify({'message': 'Token is invalid', 'error': str(e)}), 403
 
@@ -84,7 +85,8 @@ def register_routes(app):
         if not token:
             return jsonify({'message': 'Token is missing'}), 403
         try:
-            data = jwt.decode(token.split(" ")[1], app.config['SECRET_KEY'], algorithms=['HS256'])
+            token = token.split(" ")[1]  # Ensure the token is in the correct format
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         except Exception as e:
             return jsonify({'message': 'Token is invalid', 'error': str(e)}), 403
         user_id = data['user_id']
@@ -101,7 +103,8 @@ def register_routes(app):
         if not token:
             return jsonify({'message': 'Token is missing'}), 403
         try:
-            data = jwt.decode(token.split(" ")[1], app.config['SECRET_KEY'], algorithms=['HS256'])
+            token = token.split(" ")[1]  # Ensure the token is in the correct format
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         except Exception as e:
             return jsonify({'message': 'Token is invalid', 'error': str(e)}), 403
         user_id = data['user_id']
