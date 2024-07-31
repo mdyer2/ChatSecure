@@ -14,24 +14,24 @@ def register_routes(app):
         if request.method == 'POST':
             if request.is_json:
                 data = request.get_json()
+                username = data.get('username')
+                email = data.get('email')
+                password = data.get('password')
+                
+                if not username or not email or not password:
+                    return jsonify({'message': 'All fields are required'}), 400
+                
+                if User.query.filter_by(email=email).first():
+                    return jsonify({'message': 'Email already registered'}), 400
+                
+                new_user = User(username=username, email=email)
+                new_user.set_password(password)
+                db.session.add(new_user)
+                db.session.commit()
+                
+                return jsonify({'message': 'User registered successfully', 'redirect_url': url_for('login')}), 201
             else:
-                data = request.form  # Handling form data submission
-            username = data.get('username')
-            email = data.get('email')
-            password = data.get('password')
-            
-            if not username or not email or not password:
-                return jsonify({'message': 'All fields are required'}), 400
-            
-            if User.query.filter_by(email=email).first():
-                return jsonify({'message': 'Email already registered'}), 400
-            
-            new_user = User(username=username, email=email)
-            new_user.set_password(password)
-            db.session.add(new_user)
-            db.session.commit()
-            
-            return jsonify({'message': 'User registered successfully'}), 201
+                return jsonify({'message': 'Invalid content type, expected application/json'}), 415
         return render_template('registerForm.html')
 
     @app.route('/login', methods=['GET', 'POST'])
@@ -51,7 +51,7 @@ def register_routes(app):
             user = User.query.filter_by(email=email).first()
             if user and user.check_password(password):
                 token = jwt.encode({'user_id': user.id, 'exp': datetime.utcnow() + timedelta(hours=1)}, app.config['SECRET_KEY'])
-                return jsonify({'token': token})
+                return jsonify({'token': token, 'redirect_url': url_for('dashboard')})
             return jsonify({'message': 'Invalid credentials'}), 401
         return render_template('login.html')
 
@@ -118,4 +118,5 @@ def register_routes(app):
         user_id = data['user_id']
         messages = Message.query.filter((Message.sender_id == user_id) | (Message.receiver_id == user_id)).all()
         return jsonify([{'sender_id': msg.sender_id, 'receiver_id': msg.receiver_id, 'content': msg.content, 'timestamp': msg.timestamp} for msg in messages])
+
 
