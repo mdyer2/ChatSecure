@@ -12,27 +12,30 @@ def register_routes(app):
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if request.method == 'POST':
-            data = request.get_json()  # Ensure this reads JSON data
-            if data is None:
-                return jsonify({'message': 'Invalid data format, expected JSON'}), 400
-            
-            username = data.get('username')
-            email = data.get('email')
-            password = data.get('password')
-            
-            if not username or not email or not password:
-                return jsonify({'message': 'All fields are required'}), 400
-            
-            if User.query.filter_by(email=email).first():
-                return jsonify({'message': 'Email already registered'}), 400
-            
-            new_user = User(username=username, email=email)
-            new_user.set_password(password)
-            db.session.add(new_user)
-            db.session.commit()
-            
-            return jsonify({'message': 'User registered successfully'}), 201
+            if request.is_json:
+                data = request.get_json()
+                username = data.get('username')
+                email = data.get('email')
+                password = data.get('password')
+                
+                if not username or not email or not password:
+                    return jsonify({'message': 'All fields are required'}), 400
+                
+                if User.query.filter_by(email=email).first():
+                    return jsonify({'message': 'Email already registered'}), 400
+                
+                new_user = User(username=username, email=email)
+                new_user.set_password(password)
+                db.session.add(new_user)
+                db.session.commit()
+                
+                return jsonify({'message': 'User registered successfully'}), 201
+            else:
+                return jsonify({'message': 'Invalid content type, expected application/json'}), 415
         return render_template('registerForm.html')
+
+
+
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
