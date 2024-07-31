@@ -56,11 +56,11 @@ def register_routes(app):
 
     @app.route('/dashboard')
     def dashboard():
-        token = request.headers.get('Authorization')
-        if not token:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
             return jsonify({'message': 'Token is missing'}), 403
         try:
-            token = token.split(" ")[1]  # Ensure the token is in the correct format
+            token = auth_header.split(" ")[1]
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         except Exception as e:
             return jsonify({'message': 'Token is invalid', 'error': str(e)}), 403
@@ -81,14 +81,15 @@ def register_routes(app):
 
     @app.route('/send_message', methods=['POST'])
     def send_message():
-        token = request.headers.get('Authorization')
-        if not token:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
             return jsonify({'message': 'Token is missing'}), 403
         try:
-            token = token.split(" ")[1]  # Ensure the token is in the correct format
+            token = auth_header.split(" ")[1]
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         except Exception as e:
             return jsonify({'message': 'Token is invalid', 'error': str(e)}), 403
+
         user_id = data['user_id']
         data = request.get_json()
         content = data['content']
@@ -99,14 +100,15 @@ def register_routes(app):
 
     @app.route('/get_messages', methods=['GET'])
     def get_messages():
-        token = request.headers.get('Authorization')
-        if not token:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
             return jsonify({'message': 'Token is missing'}), 403
         try:
-            token = token.split(" ")[1]  # Ensure the token is in the correct format
+            token = auth_header.split(" ")[1]
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         except Exception as e:
             return jsonify({'message': 'Token is invalid', 'error': str(e)}), 403
+
         user_id = data['user_id']
         messages = Message.query.filter((Message.sender_id == user_id) | (Message.receiver_id == user_id)).all()
         return jsonify([{'sender_id': msg.sender_id, 'receiver_id': msg.receiver_id, 'content': msg.content, 'timestamp': msg.timestamp} for msg in messages])
